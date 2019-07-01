@@ -1,0 +1,10 @@
+apiVersion: v1
+name: osrm
+description: OSRM - Open Source Routing Machine
+version: 0.1.0
+appVersion: "5.22.0"
+keywords:
+  - osrm
+sources:
+- https://github.com/Project-OSRM/osrm-backend
+kubeVersion: ">=1.10.0"
