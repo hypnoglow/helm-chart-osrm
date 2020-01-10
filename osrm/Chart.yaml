@@ -7,4 +7,4 @@ keywords:
   - osrm
 sources:
 - https://github.com/Project-OSRM/osrm-backend
-kubeVersion: ">=1.10.0"
+kubeVersion: ">=1.10.0-0"
