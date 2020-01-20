@@ -1,0 +1,57 @@
+# https://circleci.com/docs/2.0/
+version: 2
+
+jobs:
+  publish-chart-tag:
+    docker:
+      - image: alpine:3.10
+        environment:
+          HELM_VERSION: "2.16.1"
+          CHART_NAME: "osrm"
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "15:46:b6:7f:9f:8a:02:bf:86:7a:b0:da:3f:06:7d:52"
+      - run:
+          name: Install dependencies
+          command: |
+            apk add -q --no-cache git curl openssh
+            curl -sSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar xz
+            mv linux-amd64/helm /usr/local/bin/helm
+            rm -rf linux-amd64
+
+            # Helm v2 requires `helm init`
+            helm init --client-only
+      - run:
+          name: Configure access
+          command: |
+            git config --global user.name "CircleCI"
+            git config --global user.email "hypnoglow+helm-charts@gmail.com"
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: Release Helm chart
+          command: |
+            [ -z "${CIRCLE_TAG}" ] && exit 1
+            version=${CIRCLE_TAG#v*}
+
+            git clone https://github.com/hypnoglow/helm-charts.git ~/sources/helm-charts
+            cd ~/sources/helm-charts
+
+            helm package ./${CHART_NAME} --version ${version} -d ./docs/
+            helm repo index ./docs --url https://hypnoglow.github.com/helm-charts
+
+            git add .
+            git commit -m "Add chart ${CHART_NAME} version ${version}"
+            git push origin master
+
+workflows:
+  version: 2
+  release-pipeline:
+    jobs:
+      - publish-chart-tag:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/
