@@ -36,11 +36,11 @@ jobs:
             version=${CIRCLE_TAG#v*}
 
             git clone https://github.com/hypnoglow/helm-charts.git ~/sources/helm-charts
+
+            helm package ./${CHART_NAME} --version ${version} -d ~/sources/helm-charts/docs/
+            helm repo index ~/sources/helm-charts/docs/ --url https://hypnoglow.github.com/helm-charts
+
             cd ~/sources/helm-charts
-
-            helm package ./${CHART_NAME} --version ${version} -d ./docs/
-            helm repo index ./docs --url https://hypnoglow.github.com/helm-charts
-
             git add .
             git commit -m "Add chart ${CHART_NAME} version ${version}"
             git push origin master
