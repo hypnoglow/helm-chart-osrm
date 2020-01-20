@@ -13,7 +13,7 @@ it with your own implementation (e.g. based on `libosrm`) if you want.
 ## Install
 
 ```bash
-helm repo add hypnoglow https://hypnoglow.github.com/helm-charts
+helm repo add hypnoglow https://hypnoglow.github.io/helm-charts
 
 # For Helm v2
 helm install hypnoglow/osrm --name osrm
