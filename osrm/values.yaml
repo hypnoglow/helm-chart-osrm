@@ -1,5 +1,8 @@
 # Default values for osrm.
 
+nameOverride: ""
+fullnameOverride: ""
+
 replicaCount: 1
 
 image:
@@ -7,10 +10,10 @@ image:
   tag: v5.22.0
   pullPolicy: IfNotPresent
 
+
 imagePullSecrets: []
 
-nameOverride: ""
-fullnameOverride: ""
+extraArgs: []
 
 service:
   type: ClusterIP

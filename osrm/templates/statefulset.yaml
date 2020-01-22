@@ -53,6 +53,9 @@ spec:
             - --algorithm
             - mld
             - /data/maps/{{ include "osrm.map-filename-osrm" . }}
+            {{- if .Values.extraArgs }}
+            {{- toYaml .Values.extraArgs | nindent 12 }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 5000
