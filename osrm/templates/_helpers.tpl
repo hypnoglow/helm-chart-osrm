@@ -44,11 +44,15 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
-{{- define "osrm.map-filename-pbf" -}}
-{{ .Values.map.source | base }}
+{{/*
+Map HTTP provider
+*/}}
+
+{{- define "osrm.map.http.filename-pbf" -}}
+{{ .Values.map.http.uri | base }}
 {{- end -}}
 
-{{- define "osrm.map-filename-osrm" -}}
-{{- $tmp := include "osrm.map-filename-pbf" . | trimSuffix (include "osrm.map-filename-pbf" . | ext) -}}
+{{- define "osrm.map.http.filename-osrm" -}}
+{{- $tmp := include "osrm.map.http.filename-pbf" . | trimSuffix (include "osrm.map.http.filename-pbf" . | ext) -}}
 {{- $tmp | trimSuffix (ext $tmp) -}}.osrm
 {{- end -}}

@@ -1,8 +1,11 @@
 # Default values for osrm.
 
+# Chart name override. Defaults to chart name, i.e. "osrm".
 nameOverride: ""
+# App name override. Defaults to name built upon release name and chart name.
 fullnameOverride: ""
 
+# How many replicas of the statefulset to deploy.
 replicaCount: 1
 
 image:
@@ -10,15 +13,49 @@ image:
   tag: v5.22.0
   pullPolicy: IfNotPresent
 
-
 imagePullSecrets: []
 
+# Init containers to add to the pod in statefulset.
+# This field is plain yaml that is inserted as-is.
+initContainers: []
+
+# Init containers to add to the pod in statefulset.
+# This field is a template string that is passed to tpl func before insertion.
+initContainersTpl: ""
+
+# Extra arguments to pass to the osrm binary.
 extraArgs: []
 
+# Extra volumes to add to the pod.
+# This field is plain yaml that is inserted as-is.
+extraVolumes: []
+#  # Example:
+#  - name: something
+#    configMap:
+#      name: some-volume
+
+# Extra volumes to add to the pod.
+# This field is a template string that is passed to tpl func before insertion.
+extraVolumesTpl: ""
+#  # Example:
+#  - name: scripts
+#    configMap:
+#      name: {{ include "osrm.fullname" . }}-scripts
+
+# Files that are stored in configmap and can be accessed from containers/initContainers.
+# This field is a map, where keys are configmap key names and values are file paths relative to chart root.
+# File contents is passed to tpl func before insertion.
+configTemplatedFiles: {}
+#  # Example:
+#  download.sh: "files/download.sh.tpl"
+#  extract.sh: "files/extract.sh.tpl"
+
+# Kubernetes Service object configuration.
 service:
   type: ClusterIP
   port: 80
 
+# Kubernetes Ingress object configuration.
 ingress:
   enabled: false
   annotations: {}
@@ -27,7 +64,6 @@ ingress:
   hosts:
     - host: chart-example.local
       paths: []
-
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -75,12 +111,61 @@ persistence:
     - ReadWriteOnce
   size: 1Gi
 
+# map configuration enables out-of-the-box map downloading from various sources and required preparations
+# (extraction, etc.).
+#
+# If you do not want to use default downloading mechanics of this chart, you can disable this.
 map:
-  # Pick the proper map from desired source/mirror.
-  # Example sources:
-  # - http://download.geofabrik.de
-  # - https://download.openstreetmap.fr/extracts/
-  source: https://download.openstreetmap.fr/extracts/europe/monaco.osm.pbf
+  # Whether the map downloading feature is enabled.
+  # If you want to manage maps yourself (e.g. mount pre-existing PV with maps to the pod),
+  # set this to false.
+  enabled: true
 
-  # Set to "true" when the .md5 file is available for checksum.
-  md5: false
+  # Configures what source provider to use to download map.
+  # Supported providers:
+  # - http
+  source: http
+
+  # http section is used when chart is configured to download maps from an HTTP endpoint.
+  http:
+    # HTTP(S) uri to download map.
+    #
+    # Some sources/mirrors you may use:
+    # - http://download.geofabrik.de
+    # - https://download.openstreetmap.fr/extracts/
+    uri: https://download.openstreetmap.fr/extracts/europe/monaco.osm.pbf
+
+    # Set to "true" when the .md5 file is available for checksum.
+    checkMD5: false
+
+    # http mode files for config map.
+    # See top-level 'configTemplatedFiles' for documentation.
+    configTemplatedFiles:
+      download.sh: "files/http-download.sh.tpl"
+      extract.sh: "files/http-extract.sh.tpl"
+
+    # http mode init containers.
+    # See tol-level 'initContainersTpl' for documentation.
+    initContainersTpl: |-
+      - name: map-downloader
+        image: busybox:1.28
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/sh
+          - /scripts/download.sh
+        volumeMounts:
+          - name: config-files
+            mountPath: /scripts
+          - name: maps
+            mountPath: /data/maps
+      - name: map-extractor
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - /bin/bash
+          - /scripts/extract.sh
+        volumeMounts:
+          - name: config-files
+            mountPath: /scripts
+          - name: maps
+            mountPath: /data/maps

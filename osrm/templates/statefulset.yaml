@@ -22,28 +22,15 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       initContainers:
-        - name: map-downloader
-          image: busybox:1.28
-          imagePullPolicy: IfNotPresent
-          command:
-            - /bin/sh
-            - /scripts/download.sh
-          volumeMounts:
-            - name: scripts
-              mountPath: /scripts
-            - name: maps
-              mountPath: /data/maps
-        - name: map-extractor
-          image: osrm/osrm-backend:v5.22.0
-          imagePullPolicy: IfNotPresent
-          command:
-            - /bin/bash
-            - /scripts/extract.sh
-          volumeMounts:
-            - name: scripts
-              mountPath: /scripts
-            - name: maps
-              mountPath: /data/maps
+      {{- with .Values.initContainersTpl }}
+      {{- ( tpl . $ ) | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
+      {{- ( tpl .Values.map.http.initContainersTpl $ ) | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -52,7 +39,7 @@ spec:
             - osrm-routed
             - --algorithm
             - mld
-            - /data/maps/{{ include "osrm.map-filename-osrm" . }}
+            - /data/maps/{{ include "osrm.map.http.filename-osrm" . }}
             {{- if .Values.extraArgs }}
             {{- toYaml .Values.extraArgs | nindent 12 }}
             {{- end }}
@@ -83,12 +70,18 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       volumes:
-        - name: scripts
+        - name: config-files
           configMap:
-            name: {{ include "osrm.fullname" . }}-scripts
+            name: {{ include "osrm.fullname" . }}-files
       {{- if not .Values.persistence.enabled }}
         - name: maps
           emptyDir: {}
+      {{- end }}
+      {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.extraVolumesTpl }}
+        {{- ( tpl . $ ) | nindent 8 }}
       {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:

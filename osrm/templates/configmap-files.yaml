@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "osrm.fullname" . }}-files
+  labels: {{ include "osrm.labels" . | nindent 4 }}
+data:
+  {{- range $key, $filepath :=  .Values.configTemplatedFiles }}
+  {{ $key }}: |- {{ ( tpl ($.Files.Get $filepath) $ ) | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
+  {{- range $key, $filepath := .Values.map.http.configTemplatedFiles }}
+  {{ $key }}: |- {{ ( tpl ($.Files.Get $filepath) $ ) | nindent 4 }}
+  {{- end }}
+  {{- end }}
