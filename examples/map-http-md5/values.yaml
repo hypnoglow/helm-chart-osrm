@@ -1,0 +1,12 @@
+# Values for OSRM
+
+persistence:
+  enabled: true
+  size: 2Gi
+
+map:
+  source: http
+  http:
+    version: "20200227-1"
+    uri: "http://download.geofabrik.de/europe/monaco-latest.osm.pbf"
+    checkMD5: true

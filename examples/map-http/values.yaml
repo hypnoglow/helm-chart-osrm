@@ -1,0 +1,11 @@
+# Values for OSRM
+
+persistence:
+  enabled: true
+  size: 2Gi
+
+map:
+  source: http
+  http:
+    version: "20200227-1"
+    uri: "https://download.openstreetmap.fr/extracts/europe/monaco.osm.pbf"
