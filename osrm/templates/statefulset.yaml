@@ -43,10 +43,10 @@ spec:
             - --algorithm
             - mld
             {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
-            - /data/maps/{{ .Values.map.http.version }}/map.osrm
+            - /data/maps/{{ .Values.map.http.version | default "unversioned" }}/map.osrm
             {{- end }}
             {{- if and .Values.map.enabled ( eq "gcs" .Values.map.source ) }}
-            - /data/maps/{{ .Values.map.gcs.version }}/map.osrm
+            - /data/maps/{{ .Values.map.gcs.version | default "unversioned" }}/map.osrm
             {{- end }}
             {{- if .Values.extraArgs }}
             {{- toYaml .Values.extraArgs | nindent 12 }}

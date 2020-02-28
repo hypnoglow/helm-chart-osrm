@@ -11,7 +11,7 @@ ensure_dependency() {
 ensure_dependency gsutil
 ensure_dependency tar
 
-version="{{ .Values.map.gcs.version }}"
+version="{{ .Values.map.gcs.version | default "unversioned" }}"
 uri="{{ .Values.map.gcs.uri }}"
 file="{{ base .Values.map.gcs.uri }}"
 
