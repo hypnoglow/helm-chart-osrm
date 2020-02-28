@@ -1,0 +1,12 @@
+# Values for OSRM
+
+persistence:
+  enabled: true
+  size: 2Gi
+
+map:
+  source: gcs
+  gcs:
+    version: "20200227-1"
+    # NOTE: this is not real URI, you have to replace it with your bucket.
+    uri: "gs://example-osrm-maps/20200227-1/map.tar.gz"
