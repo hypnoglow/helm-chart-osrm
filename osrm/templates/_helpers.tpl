@@ -43,16 +43,3 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
-
-{{/*
-Map HTTP provider
-*/}}
-
-{{- define "osrm.map.http.filename-pbf" -}}
-{{ .Values.map.http.uri | base }}
-{{- end -}}
-
-{{- define "osrm.map.http.filename-osrm" -}}
-{{- $tmp := include "osrm.map.http.filename-pbf" . | trimSuffix (include "osrm.map.http.filename-pbf" . | ext) -}}
-{{- $tmp | trimSuffix (ext $tmp) -}}.osrm
-{{- end -}}

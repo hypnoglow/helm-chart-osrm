@@ -43,7 +43,7 @@ spec:
             - --algorithm
             - mld
             {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
-            - /data/maps/{{ include "osrm.map.http.filename-osrm" . }}
+            - /data/maps/{{ .Values.map.http.version }}/map.osrm
             {{- end }}
             {{- if and .Values.map.enabled ( eq "gcs" .Values.map.source ) }}
             - /data/maps/{{ .Values.map.gcs.version }}/map.osrm
@@ -81,6 +81,7 @@ spec:
         - name: config-files
           configMap:
             name: {{ include "osrm.fullname" . }}-files
+            defaultMode: 0755
       {{- if not .Values.persistence.enabled }}
         - name: maps
           emptyDir: {}
