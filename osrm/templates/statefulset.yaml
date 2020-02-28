@@ -31,6 +31,9 @@ spec:
       {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
       {{- ( tpl .Values.map.http.initContainersTpl $ ) | nindent 8 }}
       {{- end }}
+      {{- if and .Values.map.enabled ( eq "gcs" .Values.map.source ) }}
+      {{- ( tpl .Values.map.gcs.initContainersTpl $ ) | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -39,7 +42,12 @@ spec:
             - osrm-routed
             - --algorithm
             - mld
+            {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
             - /data/maps/{{ include "osrm.map.http.filename-osrm" . }}
+            {{- end }}
+            {{- if and .Values.map.enabled ( eq "gcs" .Values.map.source ) }}
+            - /data/maps/{{ .Values.map.gcs.version }}/map.osrm
+            {{- end }}
             {{- if .Values.extraArgs }}
             {{- toYaml .Values.extraArgs | nindent 12 }}
             {{- end }}
@@ -82,6 +90,9 @@ spec:
       {{- end }}
       {{- with .Values.extraVolumesTpl }}
         {{- ( tpl . $ ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.map.enabled ( eq "gcs" .Values.map.source ) }}
+        {{- ( tpl .Values.map.gcs.extraVolumesTpl $ ) | nindent 8 }}
       {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:

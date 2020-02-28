@@ -124,9 +124,17 @@ map:
   # Configures what source provider to use to download map.
   # Supported providers:
   # - http
+  # - gcs
   source: http
 
   # http section is used when chart is configured to download maps from an HTTP endpoint.
+  #
+  # HTTP mode is designed to download .pbf file from the source, extract it and run other preparation commands.
+  # Each replica in the stateful set executes these actions on its own volume and map.
+  #
+  # HTTP mode does not support versioning yet. It downloads/extracts the map once and creates corresponding
+  # lock-files "downloaded.txt", "checksum.txt", "extracted.txt". You can remove file to re-do an action, e.g. remove
+  # "downloaded.txt" to re-download the map.
   http:
     # HTTP(S) uri to download map.
     #
@@ -169,3 +177,68 @@ map:
             mountPath: /scripts
           - name: maps
             mountPath: /data/maps
+
+  # gcs section is used when chart is configured to download maps from Google Cloud Storage bucket.
+  #
+  # gcs mode is designed to do download already prepared map files in the form of tgz archive.
+  # Each replica in the stateful set downloads its own copy of map.
+  #
+  # gcs mode supports versioning. It downloads the map once for each version, and creates "ready.lock" file.
+  # If you want to re-download the map of al1ready downloaded version on the next pod start, remove this file.
+  # There is no logic to distinguish versions, so no version can be considered "old". If you want to remove old
+  # versions from the volume, you have to do it manually.
+  gcs:
+    # An arbitrary version for the map at the uri. Any versioning scheme can be used. This field is used only to create
+    # corresponding directory within the volume and to decide whether to download a new version of the map.
+    #
+    # Example: "20200226-1"
+    version: ""
+
+    # Google Cloud Storage URI to download map archive from.
+    #
+    # Example: "gs://example-osrm-maps/20200226-1/map.tar.gz"
+    uri: ""
+
+    # To download from private gcs bucket you need google application credentials.
+    # This section allows configuring it via an externally created secret.
+    googleApplicationCredentials:
+      enabled: true
+      secretName: osrm-google-application-credentials
+      secretKey: credentials.json
+
+    # gcs mode files for config map.
+    # See top-level 'configTemplatedFiles' for documentation.
+    configTemplatedFiles:
+      download.sh: "files/gcs-download-prepared.sh.tpl"
+
+    # gcs mode init containers.
+    # See tol-level 'initContainersTpl' for documentation.
+    initContainersTpl: |-
+      - name: map-downloader
+        image: gcr.io/google.com/cloudsdktool/cloud-sdk:282.0.0-alpine
+        imagePullPolicy: IfNotPresent
+        command:
+          - /bin/bash
+          - /scripts/download.sh
+        {{- if .Values.map.gcs.googleApplicationCredentials.enabled }}
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/run/secrets/osrm/google-application-credentials/{{ .Values.map.gcs.googleApplicationCredentials.secretKey }}
+        {{- end }}
+        volumeMounts:
+          - name: config-files
+            mountPath: /scripts
+          - name: maps
+            mountPath: /data/maps
+          {{- if .Values.map.gcs.googleApplicationCredentials.enabled }}
+          - name: google-application-credentials
+            mountPath: /var/run/secrets/osrm/google-application-credentials
+            readOnly: true
+          {{- end }}
+
+    # gcs mode extra volumes.
+    # See tol-level 'extraVolumesTpl' for documentation.
+    extraVolumesTpl: |-
+      - name: google-application-credentials
+        secret:
+          secretName: {{ .Values.map.gcs.googleApplicationCredentials.secretName }}

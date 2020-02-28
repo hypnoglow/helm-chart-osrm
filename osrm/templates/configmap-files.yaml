@@ -7,8 +7,15 @@ data:
   {{- range $key, $filepath :=  .Values.configTemplatedFiles }}
   {{ $key }}: |- {{ ( tpl ($.Files.Get $filepath) $ ) | nindent 4 }}
   {{- end }}
+
   {{- if and .Values.map.enabled ( eq "http" .Values.map.source ) }}
   {{- range $key, $filepath := .Values.map.http.configTemplatedFiles }}
+  {{ $key }}: |- {{ ( tpl ($.Files.Get $filepath) $ ) | nindent 4 }}
+  {{- end }}
+  {{- end }}
+
+  {{- if and .Values.map.enabled ( eq "gcs" .Values.map.source ) }}
+  {{- range $key, $filepath := .Values.map.gcs.configTemplatedFiles }}
   {{ $key }}: |- {{ ( tpl ($.Files.Get $filepath) $ ) | nindent 4 }}
   {{- end }}
   {{- end }}
