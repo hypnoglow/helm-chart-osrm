@@ -1,20 +1,39 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -euo pipefail
 
-cd /data/maps
+ensure_dependency() {
+  if ! which "$1" &>/dev/null ; then
+    echo "$1 not found"
+    exit 1
+  fi
+}
 
-if [ ! -r downloaded.txt ]; then
-  wget {{ .Values.map.http.uri }}
-  touch downloaded.txt
-fi
+ensure_dependency wget
+ensure_dependency md5sum
 
-{{- if .Values.map.http.checkMD5 }}
-if [ ! -r checksum.txt ]; then
-  wget {{ .Values.map.http.uri }}.md5
-  md5sum -c {{ include "osrm.map.http.filename-pbf" . }}.md5
-  touch checksum.txt
+version="{{ .Values.map.http.version }}"
+uri="{{ .Values.map.http.uri }}"
+file="{{ base .Values.map.http.uri }}"
+checkMD5="{{ if .Values.map.http.checkMD5 }}1{{ end }}"
+
+mkdir -p "/data/maps/${version}"
+cd "/data/maps/${version}"
+
+if [ ! -r downloaded.lock ]; then
+  wget "${uri}"
+
+  if [ -n "${checkMD5}" ]; then
+    wget "${uri}.md5"
+    md5sum -c "${file}.md5"
+    rm "${file}.md5"
+  fi
+
+  # Rename the file so we have predictable argument name in statefulset.
+  echo "Rename ${file} -> map.osm.pbf"
+  mv "${file}" "map.osm.pbf"
+
+  touch downloaded.lock
 fi
-{{- end }}
 
 echo "Done!"
 exit 0
