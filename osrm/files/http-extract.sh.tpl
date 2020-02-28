@@ -12,7 +12,7 @@ ensure_dependency osrm-extract
 ensure_dependency osrm-partition
 ensure_dependency osrm-customize
 
-version="{{ .Values.map.http.version }}"
+version="{{ .Values.map.http.version | default "unversioned" }}"
 file_pbf="map.osm.pbf"
 file_osrm="map.osrm"
 

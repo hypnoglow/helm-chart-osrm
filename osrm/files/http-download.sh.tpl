@@ -11,7 +11,7 @@ ensure_dependency() {
 ensure_dependency wget
 ensure_dependency md5sum
 
-version="{{ .Values.map.http.version }}"
+version="{{ .Values.map.http.version | default "unversioned" }}"
 uri="{{ .Values.map.http.uri }}"
 file="{{ base .Values.map.http.uri }}"
 checkMD5="{{ if .Values.map.http.checkMD5 }}1{{ end }}"
