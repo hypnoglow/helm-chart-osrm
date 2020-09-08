@@ -1,11 +1,18 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "osrm.fullname" . -}}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
 apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-{{ include "osrm.labels" . | indent 4 }}
+  {{- include "osrm.labels" . | nindent 4 }}
+  {{- with .Values.ingress.extraLabels }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

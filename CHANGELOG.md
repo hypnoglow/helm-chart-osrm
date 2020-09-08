@@ -1,5 +1,13 @@
 # Change log
 
+## [0.4.1] - 2020-09-08
+
+- Set Ingress apiVersion to `networking.k8s.io/v1beta1` if supported.
+
+  **NOTE:** the change itself is not breaking, however, it may cause a small downtime on `helm upgrade`.
+
+- Add `extraLabels` option to Ingress.
+
 ## [0.4.0] - 2020-02-28
 
 - Add a new map source provider: Google Cloud Storage. This allows downloading maps
