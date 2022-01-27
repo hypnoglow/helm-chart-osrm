@@ -4,9 +4,9 @@
 
 Notable features:
 
-- 🗺 Out-of-the-box map management, allowing to download and persist a map by the URI. Supports HTTP(S) download currently,
-others (GCS, S3) incoming.
-- 🖴 Runs as a StatefulSet so each instance keeps its own maps in PersistentVolume
+- 🗺 Out-of-the-box map management, allowing to download and persist a map by the URI. Currently supports HTTP(S) and Google Cloud Storage,
+others (AWS S3, etc) incoming.
+- 🖴 Runs as a StatefulSet so each instance keeps its own maps in PersistentVolume.
 
 By default, this chart deploys [osrm-routed](http://project-osrm.org/docs/v5.22.0/api/) server, but you can replace
 it with your own implementation (e.g. based on `libosrm`) if you want. 
