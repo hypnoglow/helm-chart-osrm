@@ -9,9 +9,6 @@ jobs:
           HELM_VERSION: "2.16.1"
           CHART_NAME: "osrm"
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "15:46:b6:7f:9f:8a:02:bf:86:7a:b0:da:3f:06:7d:52"
       - run:
           name: Install tools
           command: |
@@ -29,8 +26,8 @@ jobs:
       - run:
           name: Configure access
           command: |
-            git config --global user.name "CircleCI"
-            git config --global user.email "hypnoglow+helm-charts@gmail.com"
+            git config --global user.name "hypnomachine"
+            git config --global user.email "hypnoglow+github-machine@gmail.com"
             git config --global url."ssh://git@github.com/".insteadOf "https://github.com/"
             ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run:
