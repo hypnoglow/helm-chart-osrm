@@ -1,5 +1,9 @@
 # Change log
 
+## [0.5.0] - 2022-06-07
+
+- Update Ingress to `networking.k8s.io/v1`. Note that this requires Kubernetes API v1.19+.
+
 ## [0.4.1] - 2020-09-08
 
 - Set Ingress apiVersion to `networking.k8s.io/v1beta1` if supported.
