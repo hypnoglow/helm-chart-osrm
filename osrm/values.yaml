@@ -123,6 +123,9 @@ map:
   # set this to false.
   enabled: true
 
+  # Profile to be used for routing (one of "car", "bicycle", "foot")
+  profile: car
+
   # Configures what source provider to use to download map.
   # Supported providers:
   # - http
