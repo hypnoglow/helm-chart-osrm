@@ -19,6 +19,7 @@ mkdir -p "/data/maps/${version}"
 cd "/data/maps/${version}"
 
 if [ ! -r downloaded.lock ]; then
+  gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
   gsutil -m cp "${uri}" .
   tar xzvf "${file}"
   rm "${file}"
