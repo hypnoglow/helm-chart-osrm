@@ -126,6 +126,9 @@ map:
   # Profile to be used for routing (one of "car", "bicycle", "foot")
   profile: car
 
+  # Threads to control your extraction
+  threads: 8
+
   # Configures what source provider to use to download map.
   # Supported providers:
   # - http
