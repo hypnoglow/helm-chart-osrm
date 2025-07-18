@@ -22,7 +22,7 @@ threads="{{ .Values.map.threads | default 8 }}"
 cd "/data/maps/${version}"
 
 if [ ! -r extracted.lock ]; then
-  osrm-extract -p /opt/${profile}.lua "${file_pbf} -t {threads}"
+  osrm-extract -p /opt/${profile}.lua "${file_pbf}" -t {threads}
   osrm-partition "${file_osrm}"
   osrm-customize "${file_osrm}"
 
