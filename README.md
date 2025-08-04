@@ -1,5 +1,7 @@
 # helm-chart-osrm
 
+![Maintenance](https://img.shields.io/maintenance/yes/2025)
+
 [Helm](https://helm.sh/) chart for [OSRM](https://github.com/Project-OSRM/osrm-backend).
 
 Notable features:
